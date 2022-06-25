@@ -30,22 +30,27 @@ app.post("/participants", async (req, res) => {
         return;
     }
 
-    const { username } = req.body; 
+    const { name } = req.body; 
 
-    const usernameTaken = await db.collection('participants').findOne({ username });
+    const usernameTaken = await db.collection('participants').findOne({ name });
 
     if (usernameTaken) {
         res.sendStatus(409);
         return;
     }
     
-    const participant = { username, lastStatus: Date.now()};
+    const participant = { name, lastStatus: Date.now()};
 
-    const message = {from: username, to: 'Todos', text: 'entra na sala...', type: 'status', time: dayjs().format("HH:mm:ss")};
+    const message = {from: name, to: 'Todos', text: 'entra na sala...', type: 'status', time: dayjs().format("HH:mm:ss")};
 
     db.collection('participants').insertOne(participant);
     db.collection('messages').insertOne(message);
     res.sendStatus(201);
+});
+
+app.get("/participants", (req, res) => {
+    const promise = db.collection('participants').find().toArray();
+    promise.then(participants => res.send(participants));
 });
 
 app.listen(5000);
