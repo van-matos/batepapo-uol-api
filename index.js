@@ -97,4 +97,16 @@ app.get("/messages", async (req, res) => {
     res.send(userMessages);
 });
 
+app.post("/status", (req, res) => {
+    const name = req.headers.user;
+    const currentUser = db.collection('participants').find({name:name}).toArray();
+
+    if (currentUser) {
+        db.collection('participants').updateOne({name:name},{ $set:{lastStatus: Date.now()} });
+        res.sendStatus(200);
+    }else{
+        res.sendStatus(404);
+    }
+})
+
 app.listen(5000);
