@@ -1,4 +1,4 @@
-import express, { request } from 'express';
+import express from 'express';
 import cors from 'cors';
 import dayjs from 'dayjs';
 import { MongoClient } from 'mongodb';
@@ -82,5 +82,19 @@ app.post("/messages", async (req, res) => {
     db.collection('messages').insertOne(message);
     res.sendStatus(201);
 })
+
+app.get("/messages", async (req, res) => {
+    const messageLimit = parseInt(req.query.limit);
+    const user = req.headers.user;
+
+    const messages = await db.collection('messages').find().toArray();
+    const userMessages = messages.filter(message => message.from === user || message.to === user || message.to === "Todos");
+
+    if (messageLimit) {
+        res.send(userMessages.slice(-messageLimit));
+    }
+
+    res.send(userMessages);
+});
 
 app.listen(5000);
